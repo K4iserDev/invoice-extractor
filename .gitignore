@@ -1,0 +1,8 @@
+# Entorno virtual
+.venv/
+
+# Variables de entorno con datos sensibles
+.env
+
+# Resultados generados (reproducibles a partir del código)
+data/output/
