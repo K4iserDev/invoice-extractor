@@ -6,3 +6,5 @@
 
 # Resultados generados (reproducibles a partir del código)
 data/output/
+
+__pycache__/
