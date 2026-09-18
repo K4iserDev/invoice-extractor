@@ -22,6 +22,6 @@ def process(path):
 
 
 if __name__ == "__main__":
-    pdf_path = INPUT_DIR / "factura_es_01.pdf"
+    pdf_path = INPUT_DIR.glob / "*.pdf"
     resultado = process(pdf_path)
     print(resultado)
