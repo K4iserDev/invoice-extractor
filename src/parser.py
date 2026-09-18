@@ -60,7 +60,7 @@ def transmitter(pdf, formato):
 
 def total(pdf, formato):
     if formato == "es":
-        total = re.search(r"TOTAL:\s*(\d+,\d+)", pdf)
+        total = re.search(r"TOTAL:\s*([\d.]+,\d+)", pdf)
     elif formato == "eng":
         total = re.search(r"TOTAL DUE:\s*\$?([\d,]+\.\d{2})", pdf)
     else:

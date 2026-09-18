@@ -11,26 +11,26 @@ def write_invoice(fact):
         ws = wb.active
         ws.append(
             [
-                fact["numero"],
                 fact["fecha"],
+                fact["formato"],
                 fact["emisor"],
                 fact["total"],
-                fact["formato"],
+                fact["numero"],
             ]
         )
         wb.save(output)
     else:
-        print("The Excel file is being created, go check \"outputs\"")
+        print('The Excel file is being created, go check "outputs"')
         wb = Workbook()
         ws = wb.active
         ws.append(["Fecha", "Format", "Emisor", "Total", "Numero"])
         ws.append(
             [
-                fact["numero"],
                 fact["fecha"],
+                fact["formato"],
                 fact["emisor"],
                 fact["total"],
-                fact["formato"],
+                fact["numero"],
             ]
         )
 
