@@ -1,4 +1,5 @@
 from config import INPUT_DIR
+from excel_writer import write_invoice
 from extractor import extract_invoice
 from parser import date, format_detector, number, total, transmitter
 
@@ -18,10 +19,11 @@ def process(path):
     factura["total"] = total(text, formato)
     factura["formato"] = formato
     factura["numero"] = number(text)
+    write_invoice(factura)
     return factura
 
 
 if __name__ == "__main__":
-    pdf_path = INPUT_DIR.glob / "*.pdf"
-    resultado = process(pdf_path)
-    print(resultado)
+    for pdf_path in INPUT_DIR.glob("*.pdf"):
+        resultado = process(pdf_path)
+        print(resultado)

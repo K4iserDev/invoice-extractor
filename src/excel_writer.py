@@ -1,7 +1,6 @@
 from openpyxl import Workbook, load_workbook
 
-from config import INPUT_DIR, OUTPUT_DIR
-from main import process
+from config import OUTPUT_DIR
 
 
 def write_invoice(fact):
@@ -21,9 +20,10 @@ def write_invoice(fact):
         )
         wb.save(output)
     else:
+        print("The Excel file is being created, go check \"outputs\"")
         wb = Workbook()
         ws = wb.active
-        ws.append(["Numero", "Fecha", "Emisor", "Total", "Formato"])
+        ws.append(["Fecha", "Format", "Emisor", "Total", "Numero"])
         ws.append(
             [
                 fact["numero"],
@@ -33,11 +33,6 @@ def write_invoice(fact):
                 fact["formato"],
             ]
         )
+
         wb.save(output)
     return True
-
-
-if __name__ == "__main__":
-    pdf_path = INPUT_DIR / "factura_es_01.pdf"
-    facture = process(pdf_path)
-    write_invoice(facture)
