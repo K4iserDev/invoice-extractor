@@ -30,8 +30,7 @@ def format_detector(detect):
         return None
 
 
-def extraer_fecha(pdf, formato):
-    print(repr(pdf))
+def date(pdf, formato):
     if formato == "es":
         fecha = re.search(r"Fecha de emisión:\s*(\d{2}/\d{2}/\d{4})", pdf)
     elif formato == "eng":
@@ -45,11 +44,11 @@ def extraer_fecha(pdf, formato):
         return fecha.group(1)
 
 
-def extraer_emisor(pdf, formato):
+def transmitter(pdf, formato):
     if formato == "es":
-        emisor = re.search(r"Cliente:\n(.+)", pdf)
+        emisor = re.search(r"Emisor Cliente\n(.+?S\.[LA]\.)", pdf)
     elif formato == "eng":
-        emisor = re.search(r"Bill to\n(.+)", pdf)
+        emisor = re.search(r"From Bill To\n(.+?(?:Ltd\.|Inc\.|LLC))", pdf)
     else:
         emisor = None
 
@@ -59,7 +58,7 @@ def extraer_emisor(pdf, formato):
         return emisor.group(1)
 
 
-def extraer_total(pdf, formato):
+def total(pdf, formato):
     if formato == "es":
         total = re.search(r"TOTAL:\s*(\d+,\d+)", pdf)
     elif formato == "eng":
@@ -73,11 +72,22 @@ def extraer_total(pdf, formato):
         return total.group(1)
 
 
+def number(pdf):
+    numero = re.search(r"(?:Nº Factura|Invoice #):\s*([\w-]+)", pdf)
+    if numero is None:
+        return None
+    else:
+        return numero.group(1)
+
+
 if __name__ == "__main__":
     pdf_path = INPUT_DIR / "factura_es_01.pdf"
     text = extract_invoice(pdf_path)
     formato = format_detector(text)
+    """"
     print(formato)
-    print(extraer_emisor(text, formato))
-    print(extraer_fecha(text, formato))
-    print(extraer_total(text, formato))
+    print(transmitter(text, formato))
+    print(date(text, formato))
+    print(total(text, formato))
+
+    """
