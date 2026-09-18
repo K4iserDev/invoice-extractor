@@ -29,27 +29,55 @@ def format_detector(detect):
         print("We have not been able to recognize the format.")
         return None
 
-def extract_invoice_num(pdf):
+
+def extraer_fecha(pdf, formato):
     print(repr(pdf))
-    fecha = re.search(r"Fecha de emisión:\s*(\d{2}/\d{2}/\d{4})", pdf)
+    if formato == "es":
+        fecha = re.search(r"Fecha de emisión:\s*(\d{2}/\d{2}/\d{4})", pdf)
+    elif formato == "eng":
+        fecha = re.search(r"Issue date:\s*(\d{4}-\d{2}-\d{2})", pdf)
+    else:
+        fecha = None
+
     if fecha is None:
-        print("no se ha encontrado nada")
+        return None
     else:
-        print(fecha.group(1))
-    cliente = re.search(r"TOTAL:\s*(\d+,\d+)", pdf)
-    if cliente is None:
-        print("no se ha encontrado nada")
+        return fecha.group(1)
+
+
+def extraer_emisor(pdf, formato):
+    if formato == "es":
+        emisor = re.search(r"Cliente:\n(.+)", pdf)
+    elif formato == "eng":
+        emisor = re.search(r"Bill to\n(.+)", pdf)
     else:
-        print(cliente.group(1))
-    emisor = re.search(r"Emisor\n(.+)", pdf)
+        emisor = None
+
     if emisor is None:
-        print("no se ha encontrado nada")
+        return None
     else:
-        print(emisor.group(1))
+        return emisor.group(1)
+
+
+def extraer_total(pdf, formato):
+    if formato == "es":
+        total = re.search(r"TOTAL:\s*(\d+,\d+)", pdf)
+    elif formato == "eng":
+        total = re.search(r"TOTAL DUE:\s*\$?([\d,]+\.\d{2})", pdf)
+    else:
+        total = None
+
+    if total is None:
+        return None
+    else:
+        return total.group(1)
 
 
 if __name__ == "__main__":
     pdf_path = INPUT_DIR / "factura_es_01.pdf"
     text = extract_invoice(pdf_path)
-    format_detector(text)
-    extract_invoice_num(text)
+    formato = format_detector(text)
+    print(formato)
+    print(extraer_emisor(text, formato))
+    print(extraer_fecha(text, formato))
+    print(extraer_total(text, formato))
