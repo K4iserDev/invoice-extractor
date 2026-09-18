@@ -1,3 +1,5 @@
+import re
+
 from config import INPUT_DIR
 from extractor import extract_invoice
 
@@ -27,8 +29,27 @@ def format_detector(detect):
         print("We have not been able to recognize the format.")
         return None
 
+def extract_invoice_num(pdf):
+    print(repr(pdf))
+    fecha = re.search(r"Fecha de emisión:\s*(\d{2}/\d{2}/\d{4})", pdf)
+    if fecha is None:
+        print("no se ha encontrado nada")
+    else:
+        print(fecha.group(1))
+    cliente = re.search(r"TOTAL:\s*(\d+,\d+)", pdf)
+    if cliente is None:
+        print("no se ha encontrado nada")
+    else:
+        print(cliente.group(1))
+    emisor = re.search(r"Emisor\n(.+)", pdf)
+    if emisor is None:
+        print("no se ha encontrado nada")
+    else:
+        print(emisor.group(1))
+
 
 if __name__ == "__main__":
-    pdf_path = INPUT_DIR / "invoice_us_01.pdf"
+    pdf_path = INPUT_DIR / "factura_es_01.pdf"
     text = extract_invoice(pdf_path)
     format_detector(text)
+    extract_invoice_num(text)
