@@ -20,10 +20,8 @@ def format_detector(detect):
         if Spanish:
             count_esp += 1
     if count_esp > count_eng:
-        print("The text it´s in Spanish")
         return "es"
     elif count_eng > count_esp:
-        print("The text it´s in English")
         return "eng"
     else:
         print("We have not been able to recognize the format.")
