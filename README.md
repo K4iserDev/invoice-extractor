@@ -1,52 +1,108 @@
+# 🧾 Invoice Extractor
 
-A Python tool that extracts structured data from PDF invoices — Spanish and international formats — and exports the results to Excel. Built as a portfolio project to demonstrate practical, rule-based data extraction combined with clean project structure and testing against a varied dataset.
+*[Leer en español](README_es.md)*
 
-What it does
-Reads the text content of a PDF invoice (pdfplumber).
-Detects the format (Spanish vs. international) by scoring domain-specific markers found in the text (IVA, NIF, € vs. VAT, Tax ID, $, etc.) — not by language detection, since the goal is identifying the correct fiscal/formatting ruleset to apply, not the language.
-Extracts key fields using regular expressions tailored to each format:
-Invoice number
-Issue date
-Issuer / vendor name
-Total amount
-Writes each processed invoice as a new row in an Excel file (openpyxl), creating the file with headers on first run and appending rows on subsequent runs.
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python&logoColor=white)
+![pdfplumber](https://img.shields.io/badge/pdfplumber-PDF_parsing-2C9AB7?style=flat)
+![openpyxl](https://img.shields.io/badge/openpyxl-Excel-217346?style=flat&logo=microsoftexcel&logoColor=white)
+![Status](https://img.shields.io/badge/status-v2_stable-success?style=flat)
 
-The pipeline processes every PDF found in data/input/ in a single run.
+**Turn a folder of PDF invoices into a clean Excel table — automatically.**
 
-Project structure
+A Python pipeline that reads Spanish and international PDF invoices, detects which fiscal format each one follows, extracts the key fields with rule-based parsing and writes them to Excel. Built as a portfolio project around a real business task: invoice data entry.
+
+![Demo: PDF invoices in, structured Excel out](docs/demo.png)
+
+---
+
+## ✨ What it does
+
+| Step | How |
+|---|---|
+| **1 · Read** | Extracts the text of every PDF in `data/input/` with `pdfplumber` |
+| **2 · Detect format** | Scores domain markers in the text (`IVA`, `NIF`, `€` vs `VAT`, `Tax ID`, `$`) to pick the Spanish or international ruleset — format detection, not language detection |
+| **3 · Extract** | Format-specific regular expressions for **invoice number**, **issue date**, **issuer** and **total** |
+| **4 · Export** | Appends one row per invoice to `data/output/Facture_results.xlsx` with `openpyxl` (creates the file and headers on first run) |
+
+```mermaid
+flowchart LR
+    A[📄 PDF invoices] --> B[extractor.py<br/>PDF → text]
+    B --> C[parser.py<br/>detect format]
+    C --> D[parser.py<br/>regex fields]
+    D --> E[excel_writer.py<br/>Excel row]
+    E --> F[📊 Facture_results.xlsx]
+```
+
+## 📊 Results
+
+Tested on a synthetic dataset of **59 invoices** — 30 Spanish and 29 international, from ~25 countries:
+
+| Field | Found |
+|---|---|
+| Invoice number | 59 / 59 |
+| Issue date | 59 / 59 |
+| Issuer | 59 / 59 |
+| Total | 59 / 59 |
+| Format detected (ES / international) | 30 / 29 |
+
+## 🚀 Quick start
+
+```bash
+git clone https://github.com/K4iserDev/invoice-extractor.git
+cd invoice-extractor
+
+python -m venv .venv
+.venv\Scripts\Activate.ps1          # Windows PowerShell
+# source .venv/bin/activate         # macOS / Linux
+
+pip install -r requirements.txt
+python src/main.py
+```
+
+Put your own PDFs in `data/input/` (50+ sample invoices are included) and open `data/output/Facture_results.xlsx`.
+
+## 🗂️ Project structure
+
+```
 invoice-extractor/
 ├── data/
-│   ├── input/          # drop PDF invoices here
-│   └── output/         # generated Excel file (git-ignored)
+│   ├── input/            # PDF invoices (sample dataset included)
+│   └── output/           # generated Excel (git-ignored)
+├── docs/                 # images for this README
 ├── src/
-│   ├── config.py        # base paths (project-root-relative, OS independent)
+│   ├── config.py         # project-root-relative paths (OS independent)
 │   ├── extractor.py      # PDF → plain text
 │   ├── parser.py         # format detection + field extraction (regex)
 │   ├── excel_writer.py   # structured data → Excel row
-│   └── main.py           # orchestrates the full pipeline
-├── .env.example          # template for future OpenAI API key usage
-├── requirements.txt
-└── README.md
-Setup
-bash
-python -m venv .venv
-.venv\Scripts\Activate.ps1        # Windows PowerShell
+│   └── main.py           # runs the full pipeline
+├── .env.example          # template for the planned LLM features
+└── requirements.txt
+```
 
-# source .venv/bin/activate       # macOS/Linux
+## 🧠 Design decisions
 
-pip install -r requirements.txt
-Usage
-Place one or more invoice PDFs in data/input/.
-Run the pipeline from the project root:
-bash
-python src/main.py
-Check data/output/Facture_results.xlsx for the extracted results.
-Known limitations
-Issuer name extraction relies on the invoice using a recognizable legal suffix (S.L., S.A., Ltd., Inc., LLC). Companies with other suffixes (e.g. S.L.U., GmbH) won't be captured correctly.
-Field extraction is regex-based and deterministic — reliable and auditable for the formats it was built against, but it does not generalize to invoice layouts it hasn't seen. This is a deliberate trade-off for financial data: a missing field (None) is safer than a silently wrong one from a probabilistic model.
-Tested against a synthetic dataset of ~60 invoices across two formats and ~25 countries; not validated against real-world scanned invoices.
-Roadmap
-Validation step: flag invoices with missing fields for manual review instead of silently writing incomplete rows.
-LLM-based line-item categorization: classify invoice concepts (materials, services, etc.) using an LLM — a task suited to interpretation rather than exact extraction, where the risk profile of an LLM is acceptable.
-LLM as a fallback, not a default: when regex extraction fails, attempt extraction via LLM as a last resort, clearly flagged as lower-confidence.
-Coordinate-based text extraction: resolve multi-column PDF layouts (issuer/client side-by-side) using word positions instead of the current legal-suffix heuristic.
+- **Regex, not an LLM, for financial fields.** Rule-based extraction is deterministic and auditable. For money, a missing field (`None`) is safer than a confident wrong value from a probabilistic model.
+- **Format detection by evidence scoring.** Each ruleset counts its own markers instead of deciding "by elimination", so an unclear invoice doesn't get forced into the wrong format.
+- **Paths resolved from the project root** (`Path(__file__).resolve()`), so the pipeline runs from any working directory on any OS.
+
+## ⚠️ Known limitations
+
+- Issuer extraction relies on a recognizable legal suffix (`S.L.`, `S.A.`, `Ltd.`, `Inc.`, `LLC`). Others such as `S.L.U.` or `GmbH` are not captured yet.
+- Dates and totals are kept as they appear on the invoice (`849,42` vs `964.08`), not normalized.
+- Tested on synthetic, digitally generated PDFs — not on scanned invoices (no OCR).
+
+## 🛣️ Roadmap
+
+- [ ] Normalize dates (ISO 8601) and totals (numeric) across formats
+- [ ] Validation step that flags invoices with missing fields for manual review
+- [ ] Coordinate-based extraction for multi-column layouts (issuer and client side by side)
+- [ ] LLM as a **fallback**, clearly flagged as lower confidence, when regex fails
+- [ ] LLM categorization of line items (materials, services…)
+
+## 🔗 Related project
+
+**[Invoice-Chatbot](https://github.com/K4iserDev/Invoice-Chatbot)** — ask questions in natural language about the invoices extracted by this tool, using the OpenAI API.
+
+---
+
+**Author:** Asier Martin · [GitHub](https://github.com/K4iserDev) · [LinkedIn](https://www.linkedin.com/in/asier-martin01)
